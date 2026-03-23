@@ -1,0 +1,14 @@
+# Pulumi State — lokal, niemals einchecken
+.pulumi/
+Pulumi.dev.yaml
+
+# Go Build
+dist/
+bin/
+xoso
+xos-ca.pem
+
+# IDE
+.idea/
+.vscode/
+.DS_Store

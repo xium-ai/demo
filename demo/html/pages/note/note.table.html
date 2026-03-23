@@ -1,0 +1,31 @@
+<div
+    class="overflow-y-auto overflow-x-auto h-[calc(100vh-120px)] border border-base-300 rounded-box shadow-lg"
+>
+    <table class="table w-full border-separate border-spacing-0">
+        <thead bind="#note" class="bg-base-200 sticky top-0 z-10">
+            <tr class="shadow-sm">
+                <th class="bg-base-200" field="id">#</th>
+                <th class="bg-base-200" field="title">Titel</th>
+                <th class="bg-base-200" field="created_at">Datum</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr
+                loop="@note"
+                data-id="id"
+                class="hover:bg-base-200 transition-colors cursor-pointer"
+            >
+                <td field="id"></td>
+                <td style="font-weight: bold" field="title"></td>
+                <td field="created_at"></td>
+            </tr>
+        </tbody>
+        <tfoot class="bg-base-100 font-bold">
+            <tr>
+                <td field="!count"></td>
+                <td>Notizen</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

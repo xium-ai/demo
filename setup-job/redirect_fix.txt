@@ -1,0 +1,14 @@
+    # XOS Client (PKCE)
+    _, clients = kc("GET", "/xos/clients?clientId=xos", token=token)
+    if not clients:
+        kc("POST", "/xos/clients", body={
+            "clientId": "xos", "enabled": True, "publicClient": True,
+            # Keycloak Wildcard: * matcht beliebigen Port
+            "redirectUris": [
+                "http://localhost:*/callback",
+                "http://127.0.0.1:*/callback"
+            ],
+            "standardFlowEnabled": True,
+            "attributes": {"pkce.code.challenge.method": "S256"},
+        }, token=token)
+    print(f"{OK}XOS Client (PKCE)")

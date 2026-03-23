@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  groups.xml — Steuert welche ctx.xml Dateien für welche Gruppe geladen werden.
+  Liegt NUR auf dem xosp-Server, nie auf Client-Rechnern.
+
+  ctx_dir: Wird im S3-Modus ignoriert — XOSP lädt alle ctx-Dateien
+           direkt aus dem MinIO Bucket xos-ctx.
+           Nur relevant wenn backend=fs (lokale Entwicklung ohne Cluster).
+
+  Rollen:   admin   → read, write, delete
+            manager → read, write
+            user    → read
+-->
+<xos_groups ctx_dir="/data/ctx">
+
+  <group name="xos-admin" role="admin">
+    <include ctx="global.conf.xml"/>
+    <include ctx="person.ctx.xml"/>
+    <include ctx="note.ctx.xml"/>
+    <include ctx="lager.ctx.xml"/>
+  </group>
+
+  <group name="xos-manager" role="manager">
+    <include ctx="global.conf.xml"/>
+    <include ctx="person.ctx.xml"/>
+    <include ctx="note.ctx.xml"/>
+  </group>
+
+  <group name="xos-user" role="user">
+    <include ctx="global.conf.xml"/>
+    <include ctx="person.ctx.xml"/>
+    <include ctx="note.ctx.xml"/>
+  </group>
+
+  <group name="xos-lager" role="manager">
+    <include ctx="global.conf.xml"/>
+    <include ctx="lager.ctx.xml"/>
+  </group>
+
+</xos_groups>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xos>
+
+  <context name="person_list" kind="collection" source="person" dsn="demo" locale="standard"
+           view="html/pages/person/person.table.html">
+    <permission role="admin"   actions="read,write,delete"/>
+    <permission role="manager" actions="read,write"/>
+    <permission role="user"    actions="read"/>
+    <list_fields>id, firstname, lastname, email, city, age, net_worth</list_fields>
+
+    <field name="id"        type="int"    header="#"        format="num:0"/>
+    <field name="firstname" type="string" header="Vorname"  filterable="true"/>
+    <field name="lastname"  type="string" header="Nachname" filterable="true"/>
+    <field name="age"       type="int"    header="Alter"    filterable="true" format="num:0"/>
+    <field name="net_worth" type="float"  header="Vermögen" filterable="true" format="cur"/>
+    <field name="street"    type="string" header="Straße"/>
+    <field name="zip"       type="string" header="PLZ"/>
+    <field name="city"      type="string" header="Stadt"    filterable="true"/>
+    <field name="email"     type="string" header="E-Mail"/>
+    <field name="phone"     type="string" header="Telefon"/>
+
+    <logic field="age">
+      <rule condition="> 30" class="text-error"/>
+    </logic>
+
+    <navigate event="on_select" to="person_detail" bind="id -> id"/>
+
+    <relation name="notes" context="note_list" type="has_many" bind="id -> person_id"/>
+
+    <ai name="list_behavior">Frage bei person_list immer exakt die list_fields ab – nicht mehr, nicht weniger.</ai>
+    <ai name="navigation">Ein Klick auf eine Tabellenzeile öffnet person_detail mit der id dieser Person.</ai>
+    <ai name="format_hint">net_worth ist Währung in EUR. age in Jahren, keine Dezimalstellen.</ai>
+  </context>
+
+  <context name="person_detail" kind="entity" source="person" dsn="demo" locale="us_market"
+           view="html/pages/person/person.detail.html">
+    <permission role="admin"   actions="read,write,delete"/>
+    <permission role="manager" actions="read,write"/>
+    <permission role="user"    actions="read"/>
+
+    <field name="id"        type="int"    readonly="true"/>
+    <field name="firstname" type="string" header="First Name" filterable="true"/>
+    <field name="lastname"  type="string" header="Last Name"  filterable="true"/>
+    <field name="age"       type="int"    header="Alter"/>
+    <field name="net_worth" type="float"  header="Vermögen"   format="cur"/>
+    <field name="street"    type="string" header="Straße"/>
+    <field name="zip"       type="string" header="PLZ"/>
+    <field name="city"      type="string" header="Stadt"/>
+    <field name="email"     type="string" header="E-Mail"/>
+    <field name="phone"     type="string" header="Telefon"/>
+
+    <logic field="net_worth">
+      <rule condition="> 1000000" class="bg-amber-500"/>
+    </logic>
+
+    <navigate event="on_notes" to="note_list" bind="id -> person_id"/>
+
+    <ai name="edit_hint">id ist readonly. net_worth als Währung formatieren.</ai>
+  </context>
+
+</xos>

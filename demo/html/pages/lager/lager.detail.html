@@ -1,0 +1,48 @@
+<div class="flex min-h-screen items-center justify-center p-4">
+    <fieldset
+        single="@lager.detail"
+        class="fieldset bg-base-200 border border-base-300 rounded-box p-6 w-full max-w-lg"
+    >
+        <legend
+            class="fieldset-legend text-xs font-semibold text-base-content/50 uppercase tracking-widest"
+        >
+            Lagerartikel
+        </legend>
+
+        <!-- ID readonly -->
+        <div class="mt-2 mb-1">
+            <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">ID</label>
+            <input class="input input-bordered bg-base-300 w-full font-mono text-base-content/60" type="text" field="id" readonly />
+        </div>
+
+        <!-- Artikel & Lagerplatz -->
+        <div class="grid grid-cols-2 gap-4 mt-2">
+            <div class="col-span-2">
+                <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">Artikel</label>
+                <input class="input input-bordered bg-base-100 w-full font-medium" type="text" field="name" />
+            </div>
+            <div>
+                <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">Lagerplatz</label>
+                <input class="input input-bordered bg-base-100 w-full font-mono" type="text" field="lager" />
+            </div>
+            <div>
+                <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">Einheit</label>
+                <input class="input input-bordered bg-base-100 w-full" type="text" field="einheit" />
+            </div>
+        </div>
+
+        <div class="divider text-xs text-base-content/40 uppercase tracking-widest">Bestand & Preis</div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">Menge</label>
+                <input class="input input-bordered bg-base-100 w-full font-mono text-right" type="number" field="menge" />
+            </div>
+            <div>
+                <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">Preis</label>
+                <input class="input input-bordered bg-base-100 w-full font-mono text-right text-success font-semibold" field="preis" />
+            </div>
+        </div>
+
+    </fieldset>
+</div>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xos>
+
+  <!--
+    Externer Firmen-MCP-Server als Datenquelle.
+    Server starten: cd xos_k8s_test && docker compose up
+    DSN in infra.conf.xml eintragen:
+      <dsn name="lager" type="plugin" url="http://localhost:9200/mcp"/>
+  -->
+
+  <context name="lager_list" kind="collection" source="lager_list" dsn="lager"
+           view="html/pages/lager/lager.table.html">
+    <permission role="admin"   actions="read,write,delete"/>
+    <permission role="manager" actions="read,write"/>
+    <permission role="user"    actions="read"/>
+
+    <list_fields>id, name, lager, menge, einheit, preis</list_fields>
+
+    <field name="id"      type="int"    header="#"        format="num:0" readonly="true"/>
+    <field name="name"    type="string" header="Artikel"  filterable="true"/>
+    <field name="lager"   type="string" header="Lager"    filterable="true"/>
+    <field name="menge"   type="int"    header="Menge"    filterable="true" format="num:0"/>
+    <field name="einheit" type="string" header="Einheit"/>
+    <field name="preis"   type="float"  header="Preis"    format="cur"/>
+
+    <logic field="menge">
+      <rule condition="&lt; 50" class="text-error"/>
+    </logic>
+
+    <navigate event="on_select" to="lager_detail" bind="id -> id"/>
+
+    <ai name="list_behavior">Frage bei lager_list immer exakt die list_fields ab.</ai>
+    <ai name="low_stock">Artikel mit Menge unter 50 sind kritisch (rot markiert).</ai>
+    <ai name="plugin_dsn">Dieser Context nutzt dsn="lager" vom type="plugin". Zum Abrufen: xos_query mit context="lager_list" und query="{ lager_list { id name lager menge einheit preis } }" aufrufen.</ai>
+  </context>
+
+  <context name="lager_detail" kind="entity" source="lager_get" dsn="lager"
+           save="lager_save"
+           view="html/pages/lager/lager.detail.html">
+    <permission role="admin"   actions="read,write,delete"/>
+    <permission role="manager" actions="read,write"/>
+    <permission role="user"    actions="read"/>
+
+    <field name="id"      type="int"    readonly="true"/>
+    <field name="name"    type="string" header="Artikel"/>
+    <field name="lager"   type="string" header="Lagerplatz"/>
+    <field name="menge"   type="int"    header="Menge"/>
+    <field name="einheit" type="string" header="Einheit"/>
+    <field name="preis"   type="float"  header="Preis" format="cur"/>
+
+    <ai name="edit_hint">id ist readonly. Änderungen über xos_ui_change_required zeigen, dann speichern.</ai>
+    <ai name="save_hint">Beim Speichern wird lager_save auf dem externen Plugin-Server aufgerufen.</ai>
+    <ai name="plugin_dsn">Dieser Context nutzt dsn="lager" vom type="plugin". Einzelnen Artikel abrufen: xos_query mit context="lager_detail" und query="{ lager_get(id: X) { id name lager menge einheit preis } }". Speichern: Workflow xos_query → xos_ui_change_required → xos_ui_save, lager_save wird vom Plugin-Server ausgeführt.</ai>
+  </context>
+
+</xos>

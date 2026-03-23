@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xos>
+
+  <context name="note_list" kind="collection" source="note" dsn="demo" locale="standard"
+           view="html/pages/note/note.table.html">
+    <permission role="admin"   actions="read,write,delete"/>
+    <permission role="manager" actions="read,write"/>
+    <permission role="user"    actions="read"/>
+    <list_fields>id, title, created_at</list_fields>
+
+    <field name="id"         type="int"    header="#"     format="num:0"/>
+    <field name="person_id"  type="int" filterable="true"/>
+    <field name="title"      type="string" header="Titel" filterable="true"/>
+    <field name="body"       type="string" header="Notiz"/>
+    <field name="created_at" type="string" header="Datum"/>
+
+    <navigate event="on_select" to="note_detail" bind="id -> id"/>
+
+    <ai name="list_behavior">
+      note_list zeigt immer nur Notizen einer bestimmten Person.
+      Filtere immer nach person_id wenn du von person_detail kommst.
+    </ai>
+  </context>
+
+  <context name="note_detail" kind="entity" source="note" dsn="demo" locale="standard"
+           view="html/pages/note/note.detail.html">
+    <permission role="admin"   actions="read,write,delete"/>
+    <permission role="manager" actions="read,write"/>
+    <permission role="user"    actions="read"/>
+
+    <field name="id"         type="int"    readonly="true"/>
+    <field name="person_id"  type="int"    readonly="true"/>
+    <field name="title"      type="string" header="Titel"/>
+    <field name="body"       type="string" header="Notiz"/>
+    <field name="created_at" type="string" header="Datum" readonly="true"/>
+
+    <ai name="edit_behavior">Nur title und body sind editierbar. id, person_id und created_at sind readonly.</ai>
+  </context>
+
+</xos>

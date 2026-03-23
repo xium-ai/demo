@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xosp
+  namespace: xos-dev
+  labels:
+    app: xosp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: xosp
+  template:
+    metadata:
+      labels:
+        app: xosp
+    spec:
+      containers:
+      - name: xosp
+        image: docker.io/xium/xosp:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9100
+        env:
+        - name: XOSP_SERVER_ADDR
+          value: ":9100"
+        - name: XOSP_HOSTNAME
+          value: "xosp.127.0.0.1.nip.io"
+        - name: XOSP_AUTH_ISSUER_URL
+          value: "http://keycloak.xos-dev.svc.cluster.local:8080/realms/xos"
+        - name: XOSP_AUTH_CLIENT_ID
+          value: "xosp"
+        - name: XOSP_CTX_BACKEND
+          value: "s3"
+        - name: XOSP_CTX_S3_ENDPOINT
+          value: "http://minio.xos-dev.svc.cluster.local:9000"
+        - name: XOSP_CTX_S3_BUCKET
+          value: "xos-html"
+        # Alle Secrets aus xos-credentials
+        - name: XOSP_AUTH_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: xos-credentials
+              key: xosp_secret
+        - name: XOSP_CTX_S3_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: xos-credentials
+              key: minio_user
+        - name: XOSP_CTX_S3_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: xos-credentials
+              key: minio_pass
+        - name: MEMGRAPH_USER
+          valueFrom:
+            secretKeyRef:
+              name: xos-credentials
+              key: memgraph_user
+        - name: MEMGRAPH_PASS
+          valueFrom:
+            secretKeyRef:
+              name: xos-credentials
+              key: memgraph_pass
+        - name: XOSP_DSN_DEMO
+          valueFrom:
+            secretKeyRef:
+              name: xos-credentials
+              key: pg_dsn
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: xosp
+  namespace: xos-dev
+spec:
+  selector:
+    app: xosp
+  type: ClusterIP
+  ports:
+  - name: mcp
+    port: 9100
+    targetPort: 9100

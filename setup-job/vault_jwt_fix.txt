@@ -1,0 +1,27 @@
+def setup_vault_jwt():
+    print("\n── Vault JWT ──────────────────────────────────────────────")
+
+    jwks_url = f"{KEYCLOAK_URL}/realms/xos/protocol/openid-connect/certs"
+
+    vault_post("sys/auth/jwt", {"type": "jwt"})
+    vault_post("auth/jwt/config", {
+        "jwks_url":     jwks_url,
+        "default_role": "xos-role",
+        # bound_issuer leer — Token Issuer ist localhost:9000 (extern)
+        # aber JWKS kommen vom internen Cluster — beide müssen funktionieren
+        "bound_issuer": "",
+    })
+    print(f"{OK}JWT Auth Config (bound_issuer=*, JWKS: ...realms/xos/...)")
+
+    vault_post("auth/jwt/role/xos-role", {
+        "role_type": "jwt", "bound_audiences": ["xos"],
+        "user_claim": "email", "groups_claim": "groups",
+        "policies": ["xos-policy"], "ttl": "1h"
+    })
+    print(f"{OK}xos-role")
+
+    vault_post("auth/jwt/role/xosp-role", {
+        "role_type": "jwt", "bound_audiences": ["xosp"],
+        "user_claim": "sub", "policies": ["xos-policy"], "ttl": "1h"
+    })
+    print(f"{OK}xosp-role")

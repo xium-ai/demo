@@ -1,0 +1,73 @@
+<div class="flex min-h-screen items-center justify-center p-4">
+    <fieldset
+        single="@person.detail"
+        class="fieldset bg-base-200 border border-base-300 rounded-box p-6 w-full max-w-lg"
+    >
+        <legend
+            class="fieldset-legend text-xs font-semibold text-base-content/50 uppercase tracking-widest"
+        >
+            Stammdaten
+        </legend>
+
+        <!-- ID sichtbar, aber nicht editierbar -->
+        <div class="mt-2 mb-1">
+            <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">ID</label>
+            <input class="input input-bordered bg-base-300 w-full font-mono text-base-content/60" type="text" field="id" readonly />
+        </div>
+
+        <!-- Name & Alter -->
+        <div class="grid grid-cols-2 gap-4 mt-2">
+            <div>
+                <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">Vorname</label>
+                <input class="input input-bordered bg-base-100 w-full font-medium" type="text" field="firstname" />
+            </div>
+            <div>
+                <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">Nachname</label>
+                <input class="input input-bordered bg-base-100 w-full font-medium" type="text" field="lastname" />
+            </div>
+            <div>
+                <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">Alter</label>
+                <input class="input input-bordered bg-base-100 w-full" type="number" field="age" />
+            </div>
+            <div>
+                <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">Vermögen</label>
+                <input class="input input-bordered bg-base-100 w-full font-mono text-success font-semibold" field="net_worth" />
+            </div>
+        </div>
+
+        <div class="divider text-xs text-base-content/40 uppercase tracking-widest">Adresse</div>
+
+        <!-- Adresse -->
+        <div class="grid grid-cols-1 gap-4">
+            <div>
+                <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">Straße</label>
+                <input class="input input-bordered bg-base-100 w-full" type="text" field="street" />
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">PLZ</label>
+                    <input class="input input-bordered bg-base-100 w-full" type="text" field="zip" />
+                </div>
+                <div class="col-span-2">
+                    <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">Stadt</label>
+                    <input class="input input-bordered bg-base-100 w-full" type="text" field="city" />
+                </div>
+            </div>
+        </div>
+
+        <div class="divider text-xs text-base-content/40 uppercase tracking-widest">Kontakt</div>
+
+        <!-- Kontakt -->
+        <div class="grid grid-cols-1 gap-4">
+            <div>
+                <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">E-Mail</label>
+                <input class="input input-bordered bg-base-100 w-full" type="email" field="email" />
+            </div>
+            <div>
+                <label class="label text-xs text-base-content/50 uppercase tracking-wider pb-1">Telefon</label>
+                <input class="input input-bordered bg-base-100 w-full" type="tel" field="phone" />
+            </div>
+        </div>
+
+    </fieldset>
+</div>

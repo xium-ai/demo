@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: xos-setup
+  namespace: xos-dev
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      restartPolicy: Never
+      serviceAccountName: xos
+      containers:
+      - name: setup
+        image: xos-setup:latest
+        imagePullPolicy: Never
+        env:
+        - name: XOS_NAMESPACE
+          value: "xos-dev"
+        - name: XOS_NIP_BASE
+          value: "127.0.0.1.nip.io"
+        - name: XOS_MINIO_USER
+          value: "xos-minio"
+        - name: XOS_KEYCLOAK_ADMIN
+          value: "admin"
+        # Passwoerter -- muessen mit infra/variables.tf uebereinstimmen
+        - name: XOS_PG_PASS
+          value: "xos-pg-bootstrap"
+        - name: XOS_MINIO_PASS
+          value: "xos-minio-bootstrap"
+        - name: XOS_KEYCLOAK_PASS
+          value: "xos-kc-bootstrap"
+        - name: XOS_MEMGRAPH_PASS
+          value: "xos-memgraph-bootstrap"

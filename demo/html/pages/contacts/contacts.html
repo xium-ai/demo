@@ -1,0 +1,28 @@
+<div class="overflow-y-auto overflow-x-auto h-[calc(100vh-120px)] border border-base-300 rounded-box shadow-lg">
+    <table class="table w-full border-separate border-spacing-0">
+        <thead bind="#contacts" class="bg-base-200 sticky top-0 z-10">
+            <tr class="shadow-sm">
+                <th class="bg-base-200" field="id">#</th>
+                <th class="bg-base-200" field="firstname">Vorname</th>
+                <th class="bg-base-200" field="lastname">Nachname</th>
+                <th class="bg-base-200" field="email">E-Mail</th>
+                <th class="bg-base-200" field="phone">Telefon</th>
+                <th class="bg-base-200" field="city">Stadt</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr
+                loop="@contacts"
+                data-id="id"
+                class="hover:bg-base-200 transition-colors cursor-pointer"
+            >
+                <td field="id"></td>
+                <td style="font-weight: bold" field="firstname"></td>
+                <td field="lastname"></td>
+                <td field="email"></td>
+                <td field="phone"></td>
+                <td field="city"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
