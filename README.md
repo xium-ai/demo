@@ -1,5 +1,14 @@
 # Xium OS — Demo Stack
 
+> ⚠️ **Hinweis für Administratoren**
+>
+> Diese Demo-Umgebung dient ausschließlich dazu, die **Funktionsfähigkeit von Xium OS** zu demonstrieren.
+> Sie wurde **bewusst einfach gehalten** — das gilt insbesondere für die Sicherheitskonfiguration:
+> Passwörter sind hartcodiert, Vault läuft im Dev-Modus, TLS ist nicht durchgängig aktiviert.
+>
+> **Diese Konfiguration ist nicht für den produktiven Einsatz geeignet.**
+> Für eine produktionsreife Deploymentanleitung: [docs.xium.ai](https://docs.xium.ai)
+
 Docker Compose Stack für die XOS Demo-Umgebung.
 
 ## Voraussetzungen
