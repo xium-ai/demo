@@ -1,37 +1,123 @@
-# XOS Demo Stack
+# Xium OS — Demo Stack
 
 Docker Compose Stack für die XOS Demo-Umgebung.
 
 ## Voraussetzungen
 
 - Docker mit Docker Compose v2
-- `python3` (für `make register`)
-- XOS Binary (`xos`) — [Download](https://github.com/xium-ai/releases)
+- [Nushell](https://www.nushell.sh/) — für das interaktive Menü und `nu tasks.nu`
+  ```bash
+  # macOS
+  brew install nushell
+
+  # Linux
+  cargo install nu
+  # oder: https://github.com/nushell/nushell/releases
+  ```
+- [MinIO Client `mc`](https://min.io/docs/minio/linux/reference/minio-mc.html) — für HTML-Upload
+  ```bash
+  # macOS
+  brew install minio/stable/mc
+
+  # Linux
+  curl -sL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc && chmod +x /usr/local/bin/mc
+  ```
+- XOS Binaries — [Download von GitHub Releases](https://github.com/xium-ai/releases/releases/latest)
+  - `xos` — Desktop Client
+  - `xoso` — Context Importer (XML → Graph)
+  - `xosb` — MCP Bridge (für Claude Desktop)
+
+---
 
 ## Schnellstart
 
+### Option A — Interaktives Menü (empfohlen)
+
 ```bash
-# Phase 1: Infrastruktur
-make infra
-
-# Warten bis Vault + Keycloak bereit sind (~30s)
-
-# Phase 2: Anwendung
-make app
-
-# XOSP Fingerprint registrieren (einmalig)
-make register
-
-# XOS starten
-./xos --etcd localhost:2379
+nu tasks.nu
 ```
 
-## Login
+Navigiere mit den Pfeiltasten durch das Menü:
 
-| | |
+```
+XOS Demo — Was soll ich tun?:
+> Phase 1 — Vault, Keycloak, PostgreSQL, etcd starten
+  Phase 2 — Anwendung starten (setzt infra voraus)
+  XOSP Fingerprint in etcd schreiben (einmalig)
+  ...
+```
+
+### Option B — Make Befehle
+
+```bash
+# Phase 1: Infrastruktur starten
+make infra
+
+# Warten bis Vault + Keycloak bereit (~30s), dann:
+
+# Phase 2: Anwendung starten
+make app
+
+# XOSP Fingerprint registrieren (einmalig nach erstem Start)
+make register
+```
+
+---
+
+## Context-Daten laden (xoso)
+
+Die XML Context-Definitionen müssen einmalig in den Memgraph-Graphen importiert werden:
+
+```bash
+# Beispiel: ctx/ Verzeichnis importieren
+xoso import --uri "bolt://memgraph:xos-memgraph-bootstrap@localhost:7687" ./demo/ctx/
+```
+
+Alle `.ctx.xml` Dateien im Verzeichnis werden in den Graph geladen.
+Nach `make reset` muss dieser Schritt wiederholt werden.
+
+---
+
+## XOS starten
+
+```bash
+xos --etcd localhost:2379
+```
+
+XOS verbindet sich mit etcd, holt die Konfiguration und öffnet den Browser.
+
+**Login:**
+| Benutzer | Passwort |
 |---|---|
-| Benutzer | `frank` / `tristan` |
-| Passwort | `xos-dev-2026` |
+| `frank` | `xos-dev-2026` |
+| `tristan` | `xos-dev-2026` |
+
+---
+
+## Claude Desktop — MCP Bridge (xosb)
+
+Um XOS über Claude Desktop per stdio anzusprechen, `xosb` in die Claude Desktop Konfiguration eintragen:
+
+**`~/Library/Application Support/Claude/claude_desktop_config.json`:**
+
+```json
+{
+  "mcpServers": {
+    "xos": {
+      "command": "/pfad/zu/xosb",
+      "args": ["--url", "https://localhost:59124/mcp"]
+    }
+  }
+}
+```
+
+`xosb` fungiert als stdio↔HTTP Bridge zwischen Claude Desktop und dem laufenden XOS.
+XOS muss gestartet sein bevor Claude Desktop die Bridge nutzen kann.
+
+> **Hinweis:** Jede neue Claude-Chat-Session startet die Bridge neu —
+> `oos_ast` (bzw. `xos_ast`) muss daher am Anfang jeder Session einmal aufgerufen werden.
+
+---
 
 ## Endpunkte
 
@@ -44,7 +130,9 @@ make register
 | etcd | http://localhost:2379 | — |
 | XOSP | https://localhost:9100 | — |
 
-## Makefile
+---
+
+## Make Befehle
 
 | Befehl | Beschreibung |
 |---|---|
@@ -52,11 +140,15 @@ make register
 | `make app` | Phase 2: XOSP, MinIO, Memgraph, Setup-Job |
 | `make register` | XOSP Fingerprint in etcd schreiben (einmalig) |
 | `make upload` | HTML-Templates nach MinIO hochladen |
-| `make seed-ctx` | Context-Gruppen in Memgraph laden |
-| `make install-ca` | OpenBao CA im Mac Keychain installieren (sudo) |
+| `make install-demo-db` | Demo-Daten in PostgreSQL laden |
+| `make get-ca` | OpenBao CA-Zertifikat holen → `xos-ca.pem` |
 | `make status` | Laufende Container anzeigen |
 | `make down` | Stack stoppen |
 | `make reset` | Stack + Volumes löschen |
+
+Oder alles über das interaktive Menü: `nu tasks.nu`
+
+---
 
 ## Stack-Komponenten
 
@@ -70,7 +162,9 @@ make register
 | Memgraph | 7687 | Graph-Datenbank für Contexts |
 | Redis | 6379 | Cache |
 | LiveKit | 7880 | Voice / Video |
-| XOSP | 9100 | Plugin-Server |
+| XOSP | 9100 | Plugin-Server (`ghcr.io/xium-ai/xosp`) |
+
+---
 
 ## make register — wann nötig?
 

@@ -156,7 +156,7 @@ services:
 
   xosp:
     profiles: [app]
-    image: docker.io/xium/xosp:latest
+    image: ghcr.io/xium-ai/xosp:latest
     platform: linux/amd64
     container_name: xos-xosp
     environment:

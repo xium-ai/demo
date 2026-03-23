@@ -14,7 +14,7 @@ const ETCD_URL    = "http://localhost:2379"
 const ETCD_KEY    = "/xos/services/xosp/fp"
 const PG_USER     = "postgres"
 const PG_PASS     = "xos-pg-bootstrap"
-const PG_DB       = "inisin"
+const PG_DB       = "xium"
 
 # ── Hilfsfunktionen ───────────────────────────────────────────────────────────
 
@@ -43,7 +43,7 @@ def script-dir [] {
 # docker compose Args als Liste zusammenbauen und extern ausführen
 # so umgeht Nushell das Flag-Parsing komplett
 def dc [args: list<string>] {
-    let base = ["compose" "--project-directory" (script-dir)]
+    let base = ["compose" "--project-name" "xos" "--project-directory" (script-dir)]
     run-external "docker" ...($base ++ $args)
 }
 
@@ -67,7 +67,7 @@ def "main app" [] {
     dc ["--profile" "app" "up" "-d" "--build"]
     print ""
     log "Warte auf setup-Job..."
-    dc ["wait" "setup"]
+    run-external "docker" "wait" "xos-setup"
     print ""
     main upload
     main install-demo-db

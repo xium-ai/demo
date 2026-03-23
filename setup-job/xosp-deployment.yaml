@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: xosp
-        image: docker.io/xium/xosp:latest
+        image: ghcr.io/xium-ai/xosp:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 9100
