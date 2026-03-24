@@ -78,11 +78,28 @@ make register
 Die XML Context-Definitionen müssen einmalig in den Memgraph-Graphen importiert werden:
 
 ```bash
-# Beispiel: ctx/ Verzeichnis importieren
-xoso import --uri "bolt://memgraph:xos-memgraph-bootstrap@localhost:7687" ./demo/ctx/
+# Alle Gruppen + Contexts laden
+xoso \
+  --uri "bolt://memgraph:xos-memgraph-bootstrap@localhost:7687" \
+  --groups ./demo/ctx/groups.xml \
+  add group
+
+# Nur eine bestimmte Gruppe laden
+xoso \
+  --uri "bolt://memgraph:xos-memgraph-bootstrap@localhost:7687" \
+  --groups ./demo/ctx/groups.xml \
+  add group xos-admin
+
+# Einen einzelnen Context aktualisieren
+xoso \
+  --uri "bolt://memgraph:xos-memgraph-bootstrap@localhost:7687" \
+  --groups ./demo/ctx/groups.xml \
+  add context person
+
+# Was ist im Graphen?
+xoso --uri "bolt://memgraph:xos-memgraph-bootstrap@localhost:7687" list
 ```
 
-Alle `.ctx.xml` Dateien im Verzeichnis werden in den Graph geladen.
 Nach `make reset` muss dieser Schritt wiederholt werden.
 
 ---

@@ -333,8 +333,18 @@ def setup_keycloak():
     token = keycloak_admin_token()
     status, _ = kc("GET", "/xos", token=token)
     if status == 404:
-        kc("POST", "", body={"realm": "xos", "enabled": True, "displayName": "XOS",
-                              "sslRequired": "none", "registrationAllowed": False}, token=token)
+        kc("POST", "", body={
+            "realm":                  "xos",
+            "enabled":                True,
+            "displayName":            "XOS",
+            "sslRequired":            "none",
+            "registrationAllowed":    False,
+            # Access Token: 8h, SSO Session: 24h, Offline Session: 30 Tage
+            "accessTokenLifespan":         28800,
+            "ssoSessionIdleTimeout":       86400,
+            "ssoSessionMaxLifespan":       86400,
+            "offlineSessionIdleTimeout":   2592000,
+        }, token=token)
     print(f"{OK}Realm: xos")
     for group in ["xos-admin", "xos-manager", "xos-user", "xos-lager"]:
         _, resp = kc("GET", f"/xos/groups?search={group}", token=token)
