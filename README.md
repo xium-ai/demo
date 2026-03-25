@@ -10,18 +10,18 @@
 > Für eine produktionsreife Deploymentanleitung: [docs.xium.ai](https://docs.xium.ai)
 
 Docker Compose Stack für die XOS Demo-Umgebung.
+Kein Registry-Login erforderlich — alle Images sind öffentlich oder werden lokal gebaut.
 
 ## Voraussetzungen
 
 - Docker mit Docker Compose v2
-- [Nushell](https://www.nushell.sh/) — für das interaktive Menü und `nu tasks.nu`
+- [Nushell](https://www.nushell.sh/)
   ```bash
   # macOS
   brew install nushell
 
   # Linux
-  cargo install nu
-  # oder: https://github.com/nushell/nushell/releases
+  # https://github.com/nushell/nushell/releases
   ```
 - [MinIO Client `mc`](https://min.io/docs/minio/linux/reference/minio-mc.html) — für HTML-Upload
   ```bash
@@ -31,88 +31,53 @@ Docker Compose Stack für die XOS Demo-Umgebung.
   # Linux
   curl -sL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc && chmod +x /usr/local/bin/mc
   ```
-- XOS Binaries — [Download von GitHub Releases](https://github.com/xium-ai/releases/releases/latest)
-  - `xos` — Desktop Client
-  - `xoso` — Context Importer (XML → Graph)
-  - `xosb` — MCP Bridge (für Claude Desktop)
+- XOS Binaries — per `install.sh` oder [manuell von GitHub Releases](https://github.com/xium-ai/releases/releases/latest)
+  ```bash
+  ./install.sh
+  ```
+  Installiert: `xos`, `xoso`, `xosb`
 
 ---
 
 ## Schnellstart
 
-### Option A — Interaktives Menü (empfohlen)
-
-```bash
-nu tasks.nu
-```
-
-Navigiere mit den Pfeiltasten durch das Menü:
-
-```
-XOS Demo — Was soll ich tun?:
-> Phase 1 — Vault, Keycloak, PostgreSQL, etcd starten
-  Phase 2 — Anwendung starten (setzt infra voraus)
-  XOSP Fingerprint in etcd schreiben (einmalig)
-  ...
-```
-
-### Option B — Make Befehle
+### Lokal (alles auf demselben Rechner)
 
 ```bash
 # Phase 1: Infrastruktur starten
 make infra
 
 # Warten bis Vault + Keycloak bereit (~30s), dann:
-
-# Phase 2: Anwendung starten
 make app
 
-# XOSP Fingerprint registrieren (einmalig nach erstem Start)
-make register
+# XOS starten
+./xos --etcd localhost:2379
 ```
+
+### Remote (Stack läuft auf einem anderen Rechner)
+
+Wenn der Demo-Stack auf einem anderen Rechner läuft (z.B. Server, VM), muss die
+IP-Adresse dieses Rechners beim Start bekannt gemacht werden:
+
+```bash
+# Auf dem Server — Stack mit der eigenen IP starten
+XOS_NIP_BASE=<SERVER-IP>.nip.io make reset
+make infra
+make app
+```
+
+```bash
+# Auf dem Client-Rechner — XOS mit den Remote-Adressen starten
+./xos --xosp-url https://<SERVER-IP>:9100 --etcd <SERVER-IP>:2379
+```
+
+Das CA-Zertifikat (`xos-ca.pem`) vom Server holen und dem System als
+vertrauenswürdig hinzufügen, damit die TLS-Verbindung zu XOSP funktioniert.
 
 ---
 
-## Context-Daten laden (xoso)
+## Login
 
-Die XML Context-Definitionen müssen einmalig in den Memgraph-Graphen importiert werden:
-
-```bash
-# Alle Gruppen + Contexts laden
-xoso \
-  --uri "bolt://memgraph:xos-memgraph-bootstrap@localhost:7687" \
-  --groups ./demo/ctx/groups.xml \
-  add group
-
-# Nur eine bestimmte Gruppe laden
-xoso \
-  --uri "bolt://memgraph:xos-memgraph-bootstrap@localhost:7687" \
-  --groups ./demo/ctx/groups.xml \
-  add group xos-admin
-
-# Einen einzelnen Context aktualisieren
-xoso \
-  --uri "bolt://memgraph:xos-memgraph-bootstrap@localhost:7687" \
-  --groups ./demo/ctx/groups.xml \
-  add context person
-
-# Was ist im Graphen?
-xoso --uri "bolt://memgraph:xos-memgraph-bootstrap@localhost:7687" list
-```
-
-Nach `make reset` muss dieser Schritt wiederholt werden.
-
----
-
-## XOS starten
-
-```bash
-xos --etcd localhost:2379
-```
-
-XOS verbindet sich mit etcd, holt die Konfiguration und öffnet den Browser.
-
-**Login:**
 | Benutzer | Passwort |
 |---|---|
 | `frank` | `xos-dev-2026` |
@@ -121,8 +86,6 @@ XOS verbindet sich mit etcd, holt die Konfiguration und öffnet den Browser.
 ---
 
 ## Claude Desktop — MCP Bridge (xosb)
-
-Um XOS über Claude Desktop per stdio anzusprechen, `xosb` in die Claude Desktop Konfiguration eintragen:
 
 **`~/Library/Application Support/Claude/claude_desktop_config.json`:**
 
@@ -137,11 +100,8 @@ Um XOS über Claude Desktop per stdio anzusprechen, `xosb` in die Claude Desktop
 }
 ```
 
-`xosb` fungiert als stdio↔HTTP Bridge zwischen Claude Desktop und dem laufenden XOS.
-XOS muss gestartet sein bevor Claude Desktop die Bridge nutzen kann.
-
 > **Hinweis:** Jede neue Claude-Chat-Session startet die Bridge neu —
-> `oos_ast` (bzw. `xos_ast`) muss daher am Anfang jeder Session einmal aufgerufen werden.
+> `xos_ast` muss daher am Anfang jeder Session einmal aufgerufen werden.
 
 ---
 
@@ -149,12 +109,13 @@ XOS muss gestartet sein bevor Claude Desktop die Bridge nutzen kann.
 
 | Service | URL | Zugangsdaten |
 |---|---|---|
-| Keycloak | http://keycloak.127.0.0.1.nip.io:8080/admin | `admin` / `xos-kc-bootstrap` |
-| OpenBao (Vault) | http://openbao.127.0.0.1.nip.io:8200/ui | Token: `xos-dev-root-token` |
+| Keycloak | http://localhost:8080/admin | `admin` / `xos-kc-bootstrap` |
+| OpenBao (Vault) | http://localhost:8200/ui | Token: `xos-dev-root-token` |
 | MinIO Console | http://localhost:9001 | `xos-minio` / `xos-minio-bootstrap` |
 | Memgraph Lab | http://localhost:3000 | — |
-| etcd | http://localhost:2379 | — |
 | XOSP | https://localhost:9100 | — |
+
+Bei Remote-Betrieb `localhost` durch die Server-IP ersetzen.
 
 ---
 
@@ -164,15 +125,12 @@ XOS muss gestartet sein bevor Claude Desktop die Bridge nutzen kann.
 |---|---|
 | `make infra` | Phase 1: Vault, Keycloak, PostgreSQL, etcd |
 | `make app` | Phase 2: XOSP, MinIO, Memgraph, Setup-Job |
-| `make register` | XOSP Fingerprint in etcd schreiben (einmalig) |
 | `make upload` | HTML-Templates nach MinIO hochladen |
 | `make install-demo-db` | Demo-Daten in PostgreSQL laden |
 | `make get-ca` | OpenBao CA-Zertifikat holen → `xos-ca.pem` |
 | `make status` | Laufende Container anzeigen |
 | `make down` | Stack stoppen |
 | `make reset` | Stack + Volumes löschen |
-
-Oder alles über das interaktive Menü: `nu tasks.nu`
 
 ---
 
@@ -188,15 +146,4 @@ Oder alles über das interaktive Menü: `nu tasks.nu`
 | Memgraph | 7687 | Graph-Datenbank für Contexts |
 | Redis | 6379 | Cache |
 | LiveKit | 7880 | Voice / Video |
-| XOSP | 9100 | Plugin-Server (`ghcr.io/xium-ai/xosp`) |
-
----
-
-## make register — wann nötig?
-
-`make register` liest den XOSP Fingerprint aus Vault und schreibt ihn in etcd.
-Ausführen nach:
-- Erstem `make app`
-- `make reset` (neues Vault-Volume → neuer Fingerprint)
-
-Solange das Vault-Volume erhalten bleibt (`make down` / `make app`), bleibt der Fingerprint konstant.
+| XOSP | 9100 | Plugin-Server |

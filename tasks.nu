@@ -1,20 +1,25 @@
 #!/usr/bin/env nu
 # tasks.nu — XOS Demo Task Runner
-# Verwendung:  nu tasks.nu            -> interaktives Menü
-#              nu tasks.nu infra      -> direkt ausführen
+# Verwendung:  nu tasks.nu                                    -> interaktives Menü
+#              nu tasks.nu infra                              -> direkt ausführen
+#              XOS_NIP_BASE=192.168.1.140.nip.io nu tasks.nu -> Remote-Betrieb
 
-const NIP_BASE    = "127.0.0.1.nip.io"
 const MINIO_ALIAS = "xos-dev"
-const MINIO_URL   = "http://localhost:9000"
 const MINIO_USER  = "xos-minio"
 const MINIO_PASS  = "xos-minio-bootstrap"
 const VAULT_URL   = "http://localhost:8200"
 const VAULT_TOKEN = "xos-dev-root-token"
+const MINIO_URL   = "http://localhost:9000"
 const ETCD_URL    = "http://localhost:2379"
 const ETCD_KEY    = "/xos/services/xosp/fp"
 const PG_USER     = "postgres"
 const PG_PASS     = "xos-pg-bootstrap"
 const PG_DB       = "xium"
+
+# NIP_BASE aus Env-Variable lesen -- Default: lokal
+def nip-base [] {
+    $env | get -o XOS_NIP_BASE | default "127.0.0.1.nip.io"
+}
 
 # ── Hilfsfunktionen ───────────────────────────────────────────────────────────
 
@@ -41,7 +46,6 @@ def script-dir [] {
 }
 
 # docker compose Args als Liste zusammenbauen und extern ausführen
-# so umgeht Nushell das Flag-Parsing komplett
 def dc [args: list<string>] {
     let base = ["compose" "--project-name" "xos" "--project-directory" (script-dir)]
     run-external "docker" ...($base ++ $args)
@@ -54,8 +58,8 @@ def "main infra" [] {
     dc ["--profile" "infra" "up" "-d"]
     print ""
     ok "Infrastruktur gestartet"
-    print $"  Vault:    http://openbao.($NIP_BASE):8200/ui  \(Token: xos-dev-root-token\)"
-    print $"  Keycloak: http://keycloak.($NIP_BASE):8080/admin  \(admin / xos-kc-bootstrap\)"
+    print $"  Vault:    http://openbao.(nip-base):8200/ui  \(Token: xos-dev-root-token\)"
+    print $"  Keycloak: http://keycloak.(nip-base):8080/admin  \(admin / xos-kc-bootstrap\)"
     print ""
     print "-> Wenn Vault + Keycloak bereit: nu tasks.nu app"
 }
@@ -77,7 +81,7 @@ def "main app" [] {
     ok "XOS Demo gestartet"
     print "====================================="
     print "  MinIO:  http://localhost:9001"
-    print "  XOSP:   https://localhost:9100"
+    print $"  XOSP:   https://localhost:9100"
     print "  Login:  frank / xos-dev-2026"
 }
 
@@ -145,10 +149,7 @@ def "main get-ca" [] {
     let ca_path = ([$"(script-dir)" "xos-ca.pem"] | path join)
     rm -f $ca_path
 
-    let result = (http get
-        --headers [X-Vault-Token $VAULT_TOKEN]
-        $"($VAULT_URL)/v1/pki/ca/pem")
-
+    let result = (http get --headers [X-Vault-Token $VAULT_TOKEN] $"($VAULT_URL)/v1/pki/ca/pem")
     $result | save $ca_path
     ok "xos-ca.pem"
 }
@@ -158,10 +159,7 @@ def "main get-ca" [] {
 def "main register" [] {
     log "Lese XOSP Fingerprint aus Vault..."
 
-    let resp = (http get
-        --headers [X-Vault-Token $VAULT_TOKEN]
-        $"($VAULT_URL)/v1/secret/data/xosp/identity")
-
+    let resp = (http get --headers [X-Vault-Token $VAULT_TOKEN] $"($VAULT_URL)/v1/secret/data/xosp/identity")
     let fp = $resp.data.data.fingerprint
 
     print $"   Fingerprint: ($fp | str substring 0..16)..."
@@ -170,10 +168,7 @@ def "main register" [] {
     let key_b64   = ($ETCD_KEY | encode base64)
     let value_b64 = ($fp | encode base64)
 
-    (http post
-        --content-type application/json
-        $"($ETCD_URL)/v3/kv/put"
-        {key: $key_b64, value: $value_b64}) | ignore
+    (http post --content-type application/json $"($ETCD_URL)/v3/kv/put" {key: $key_b64, value: $value_b64}) | ignore
 
     ok "Fingerprint registriert — XOS neu starten"
 }
