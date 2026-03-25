@@ -154,9 +154,13 @@ services:
     ports:
       - "7880:7880"
 
+  # xosp wird lokal gebaut -- Binary kommt von github.com/xium-ai/releases (public)
+  # kein Registry-Login nötig
   xosp:
     profiles: [app]
-    image: ghcr.io/xium-ai/xosp:latest
+    build:
+      context: .
+      dockerfile: xosp.Dockerfile
     platform: linux/amd64
     container_name: xos-xosp
     environment:
