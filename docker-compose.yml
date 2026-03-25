@@ -192,7 +192,9 @@ services:
     restart: "no"
     environment:
       XOS_NAMESPACE:      xos-dev
-      XOS_NIP_BASE:       127.0.0.1.nip.io
+      # XOS_NIP_BASE aus der Shell-Umgebung -- Default: 127.0.0.1.nip.io (lokal)
+      # Remote-Betrieb: XOS_NIP_BASE=192.168.1.x.nip.io nu tasks.nu app
+      XOS_NIP_BASE:       ${XOS_NIP_BASE:-127.0.0.1.nip.io}
       XOS_MINIO_USER:     xos-minio
       XOS_KEYCLOAK_ADMIN: admin
       XOS_PG_PASS:        xos-pg-bootstrap
