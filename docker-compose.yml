@@ -161,6 +161,7 @@ services:
     build:
       context: .
       dockerfile: xosp.Dockerfile
+      network: host
     platform: linux/amd64
     container_name: xos-xosp
     environment:

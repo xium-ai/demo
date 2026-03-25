@@ -3,9 +3,6 @@ FROM alpine:3.21
 ARG XOSP_VERSION=latest
 ARG GITHUB_REPO=xium-ai/releases
 
-# DNS fix für Linux Docker Build
-RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf
-
 RUN apk add --no-cache curl ca-certificates
 
 RUN ARCH=$(uname -m) && \
